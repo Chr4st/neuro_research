@@ -1,0 +1,40 @@
+# Default configuration for ADNI NDM-TDA pipeline
+
+data:
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  connectome_path: "data/processed/connectome.npy"
+  cortical_thickness_path: "data/processed/cortical_thickness.csv"
+  roi_labels_path: "data/processed/roi_labels.txt"
+
+ndm:
+  beta: 0.1  # Diffusion rate parameter
+  time_steps: [0.1, 0.5, 1.0, 2.0, 5.0]  # Time points for diffusion
+  normalize_laplacian: true  # Use normalized Laplacian
+
+tda:
+  filtration_mode: "node"  # "node" or "edge"
+  max_dimension: 1  # Maximum homology dimension (0=H0, 1=H1)
+  persistence_image_resolution: [20, 20]  # Resolution for persistence images
+  persistence_image_bandwidth: 0.1  # Bandwidth for Gaussian kernel
+  tmi_metric: "wasserstein"  # "wasserstein" or "bottleneck"
+  tmi_p: 2  # p-norm for Wasserstein distance
+
+clustering:
+  n_components: 10  # Number of components for dimensionality reduction
+  reduction_method: "umap"  # "umap", "pca", or "none"
+  clustering_method: "hdbscan"  # "hdbscan", "gmm", or "kmeans"
+  umap_n_neighbors: 15
+  umap_min_dist: 0.1
+  hdbscan_min_cluster_size: 5
+  hdbscan_min_samples: 3
+
+output:
+  results_dir: "results"
+  figures_dir: "results/figures"
+  tables_dir: "results/tables"
+  logs_dir: "results/logs"
+
+random_seed: 42
+n_jobs: -1  # -1 for all available cores
+

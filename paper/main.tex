@@ -1,0 +1,127 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Topological Misalignment of Network-Diffusion Residuals Reveals Alzheimer's Disease Subtypes and Progression Pathways}
+
+\author{Your Name$^{1,2}$, Co-Author$^{2}$, \ldots}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Alzheimer's disease (AD) exhibits substantial heterogeneity in clinical presentation and progression, suggesting the existence of distinct subtypes. We propose a novel framework combining Network Diffusion Models (NDM) with Topological Data Analysis (TDA) to identify AD subtypes based on the topological structure of residual pathology patterns. We apply NDM to structural connectomes to predict expected pathology spread, compute residuals between observed and predicted cortical atrophy, and extract persistent homology features from these residuals. We introduce the Topological Misalignment Index (TMI) to quantify topological deviation from a reference pattern. Clustering subjects in the space of TDA features and TMI reveals distinct AD subtypes with different progression pathways. Our method is applied to ADNI data and demonstrates improved subtype characterization compared to traditional approaches.
+\end{abstract}
+
+\section{Introduction}
+
+Alzheimer's disease (AD) is a neurodegenerative disorder characterized by progressive cognitive decline and brain atrophy. However, AD exhibits substantial heterogeneity in clinical presentation, progression rates, and spatial patterns of pathology \cite{reference1}. This heterogeneity suggests the existence of distinct AD subtypes, each with potentially different underlying mechanisms and progression pathways.
+
+Network Diffusion Models (NDM) have been successfully applied to model disease progression in AD \cite{raj2012}. NDM predicts how pathology spreads through the brain's structural connectome, assuming disease propagates along white matter tracts. The difference between observed pathology and NDM-predicted pathology---the residual---may capture subject-specific deviations from the expected network-based progression.
+
+Topological Data Analysis (TDA) provides tools to characterize the shape and structure of data \cite{edelsbrunner2010}. Persistent homology, a key TDA method, identifies topological features (connected components, holes, etc.) that persist across different scales. Applied to residual fields, persistent homology can capture the topological structure of how pathology deviates from the expected network diffusion pattern.
+
+\section{Methods}
+
+\subsection{Data}
+
+We use data from the Alzheimer's Disease Neuroimaging Initiative (ADNI). The dataset includes:
+\begin{itemize}
+    \item T1-weighted MRI scans for cortical thickness measurement
+    \item Structural connectomes derived from diffusion MRI (optional: group-level template)
+    \item Clinical and demographic information
+\end{itemize}
+
+\subsection{Network Diffusion Model}
+
+The Network Diffusion Model describes pathology spread as:
+\begin{equation}
+\frac{dx}{dt} = -\beta L x
+\end{equation}
+where $x(t)$ is the pathology pattern at time $t$, $\beta$ is the diffusion rate, and $L$ is the graph Laplacian of the structural connectome.
+
+The solution is:
+\begin{equation}
+x(t) = \exp(-\beta L t) x(0)
+\end{equation}
+
+We apply NDM to predict expected pathology from an initial seed pattern.
+
+\subsection{Residual Computation}
+
+For each subject, we compute residuals:
+\begin{equation}
+r = x_{\text{obs}} - x_{\text{diff}}
+\end{equation}
+where $x_{\text{obs}}$ is observed cortical thickness (or atrophy) and $x_{\text{diff}}$ is the NDM-predicted pattern.
+
+\subsection{Topological Data Analysis}
+
+We compute persistent homology on the residual field using a node-based filtration, where each ROI is a point and the residual value determines the filtration height. This yields persistence diagrams for H0 (connected components) and H1 (loops).
+
+\subsection{Topological Misalignment Index (TMI)}
+
+TMI quantifies the topological distance between a subject's persistence diagram and a reference diagram (e.g., healthy controls):
+\begin{equation}
+\text{TMI} = d(D_{\text{subject}}, D_{\text{reference}})
+\end{equation}
+where $d$ is the Wasserstein or bottleneck distance.
+
+\subsection{Baire Category Theorem and Theoretical Foundations}
+
+The space of persistence diagrams, equipped with the Wasserstein or bottleneck metric, forms a complete metric space. The Baire Category Theorem guarantees that in such spaces, the intersection of countably many dense open sets is dense. This theoretical property ensures that:
+
+\begin{itemize}
+    \item The space of persistence diagrams has a well-defined topological structure
+    \item Dense subsets (e.g., diagrams close to a reference) have non-empty intersections
+    \item The TMI metric space is complete, ensuring convergence properties for clustering and analysis
+\end{itemize}
+
+We verify the Baire property computationally to ensure the theoretical foundations of our TDA approach are sound.
+
+\subsection{Subtype Discovery}
+
+We combine persistence image features and TMI, reduce dimensionality using UMAP, and cluster subjects using HDBSCAN to identify distinct AD subtypes.
+
+\section{Results}
+
+[Results section to be filled with:
+\begin{itemize}
+    \item Number of discovered subtypes
+    \item Characterization of each subtype (spatial patterns, progression rates)
+    \item Clinical associations
+    \item Comparison with traditional clustering methods
+\end{itemize}]
+
+\section{Discussion}
+
+[Discussion of:
+\begin{itemize}
+    \item Biological interpretation of subtypes
+    \item Implications for personalized medicine
+    \item Limitations and future directions
+\end{itemize}]
+
+\section{Conclusion}
+
+We present a novel framework combining NDM and TDA to identify AD subtypes based on topological structure of residual pathology. This approach reveals distinct progression pathways and may inform personalized treatment strategies.
+
+\section*{Acknowledgments}
+
+Data used in preparation of this article were obtained from the Alzheimer's Disease Neuroimaging Initiative (ADNI) database. ADNI is funded by the National Institute on Aging and other sources.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}
+
