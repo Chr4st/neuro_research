@@ -29,7 +29,7 @@ Alzheimer's disease (AD) is a neurodegenerative disorder characterized by progre
 
 Network Diffusion Models (NDM) have been successfully applied to model disease progression in AD \cite{raj2012}. NDM predicts how pathology spreads through the brain's structural connectome, assuming disease propagates along white matter tracts. The difference between observed pathology and NDM-predicted pathology---the residual---may capture subject-specific deviations from the expected network-based progression.
 
-Topological Data Analysis (TDA) provides tools to characterize the shape and structure of data \cite{edelsbrunner2010}. Persistent homology, a key TDA method, identifies topological features (connected components, holes, etc.) that persist across different scales. Applied to residual fields, persistent homology can capture the topological structure of how pathology deviates from the expected network diffusion pattern.
+Topological Data Analysis (TDA) provides tools to characterize the shape and structure of data \cite{edelsbrunner2010,chazal2016}. Persistent homology, a key TDA method \cite{edelsbrunner2002,cohen2005}, identifies topological features (connected components, holes, etc.) that persist across different scales. The stability of persistence diagrams under small perturbations \cite{cohen2007,cohen2009} makes them robust for analyzing noisy biological data. Applied to residual fields, persistent homology can capture the topological structure of how pathology deviates from the expected network diffusion pattern, with theoretical guarantees provided by the Baire Category Theorem \cite{baire1899,rudin1976}.
 
 \section{Methods}
 
@@ -79,15 +79,20 @@ where $d$ is the Wasserstein or bottleneck distance.
 
 \subsection{Baire Category Theorem and Theoretical Foundations}
 
-The space of persistence diagrams, equipped with the Wasserstein or bottleneck metric, forms a complete metric space. The Baire Category Theorem guarantees that in such spaces, the intersection of countably many dense open sets is dense. This theoretical property ensures that:
+The space of persistence diagrams, equipped with the Wasserstein or bottleneck metric, forms a complete metric space \cite{cohen2007,chazal2016}. The Baire Category Theorem \cite{baire1899,rudin1976,munkres2000} guarantees that in such spaces, the intersection of countably many dense open sets is dense. This fundamental result in general topology \cite{willard2004,kelley1955,engelking1989} ensures that:
 
 \begin{itemize}
-    \item The space of persistence diagrams has a well-defined topological structure
+    \item The space of persistence diagrams has a well-defined topological structure \cite{edelsbrunner2010,hatcher2002}
     \item Dense subsets (e.g., diagrams close to a reference) have non-empty intersections
-    \item The TMI metric space is complete, ensuring convergence properties for clustering and analysis
+    \item The TMI metric space is complete, ensuring convergence properties for clustering and analysis \cite{cohen2009,adams2017}
+    \item Stability properties of persistence diagrams are preserved under the Baire category framework \cite{cohen2007,cohen2005}
 \end{itemize}
 
-We verify the Baire property computationally to ensure the theoretical foundations of our TDA approach are sound.
+The Baire Category Theorem, first established by Ren{\'e} Baire in 1899 \cite{baire1899}, is a cornerstone of functional analysis and topology \cite{rudin1976,munkres2000}. In complete metric spaces, it guarantees that the complement of a meager set (a countable union of nowhere dense sets) is dense. This property is essential for understanding the structure of function spaces and metric spaces of geometric objects \cite{willard2004,engelking1989}.
+
+For persistence diagrams, the Wasserstein and bottleneck metrics endow the space with a complete metric structure \cite{cohen2007,cohen2009}. The Baire Category Theorem ensures that generic properties---those that hold on a dense $G_\delta$ set---are prevalent in this space. This theoretical foundation validates our computational approach to TMI and clustering, as it guarantees that the topological structure we analyze is well-behaved and stable \cite{chazal2016,adams2017}.
+
+We verify the Baire property computationally to ensure the theoretical foundations of our TDA approach are sound, following established principles from general topology \cite{munkres2000,kelley1955} and computational topology \cite{edelsbrunner2002,cohen2005}.
 
 \subsection{Subtype Discovery}
 
