@@ -11,7 +11,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -46,7 +45,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info("Script 07: Run Statistics and Plots")
     logger.info("=" * 60)
     
-    # Load data
     labels_path = results_dir / f"cluster_labels_t{time_point}.npy"
     tmi_path = results_dir / f"tmi_values_t{time_point}.npy"
     pi_path = results_dir / f"persistence_images_t{time_point}.npy"
@@ -63,14 +61,12 @@ def main(config_path: str = None, time_point: float = 1.0):
     
     logger.info(f"Loaded cluster labels: {len(labels)} subjects")
     
-    # Load metadata
     metadata_path = processed_dir / "metadata.csv"
     metadata = None
     if metadata_path.exists():
         metadata = pd.read_csv(metadata_path)
         logger.info(f"Loaded metadata: {metadata.shape}")
     
-    # Compute cluster statistics
     if persistence_images is not None:
         logger.info("Computing cluster statistics...")
         cluster_stats = compute_cluster_statistics(
@@ -91,14 +87,12 @@ def main(config_path: str = None, time_point: float = 1.0):
     if tmi_values is not None:
         logger.info("Analyzing TMI...")
         
-        # Plot TMI distribution
         diagnoses = None
         if metadata is not None and 'Diagnosis' in metadata.columns:
             diagnoses = metadata['Diagnosis'].values
             plot_path = figures_dir / f"tmi_by_diagnosis_t{time_point}.png"
             plot_tmi_distribution(tmi_values, diagnoses=diagnoses, save_path=plot_path)
             
-            # Compute TMI by diagnosis
             tmi_by_diag = compute_tmi_by_diagnosis(tmi_values, diagnoses)
             tmi_stats_path = tables_dir / f"tmi_by_diagnosis_t{time_point}.csv"
             tmi_by_diag.to_csv(tmi_stats_path, index=False)
@@ -107,12 +101,10 @@ def main(config_path: str = None, time_point: float = 1.0):
             plot_path = figures_dir / f"tmi_distribution_t{time_point}.png"
             plot_tmi_distribution(tmi_values, save_path=plot_path)
         
-        # Plot embedding colored by TMI
         if embedding is not None:
             plot_path = figures_dir / f"embedding_by_tmi_t{time_point}.png"
             plot_embedding(embedding, colors=tmi_values, save_path=plot_path, title="Embedding Colored by TMI")
     
-    # Plot embedding colored by diagnosis
     if embedding is not None and metadata is not None and 'Diagnosis' in metadata.columns:
         diagnoses = metadata['Diagnosis'].values
         plot_path = figures_dir / f"embedding_by_diagnosis_t{time_point}.png"
@@ -140,12 +132,10 @@ def main(config_path: str = None, time_point: float = 1.0):
                     corr.to_csv(corr_path, index=False)
                     logger.info(f"Saved TMI-{var} correlation to {corr_path}")
     
-    # Plot example persistence diagram
     diagrams_path = results_dir / f"persistence_diagrams_t{time_point}.npy"
     if diagrams_path.exists():
         diagrams = np.load(diagrams_path, allow_pickle=True)
         if len(diagrams) > 0:
-            # Plot first subject's diagram
             plot_path = figures_dir / f"persistence_diagram_example_t{time_point}.png"
             plot_persistence_diagram(diagrams[0], save_path=plot_path, title="Example Persistence Diagram")
     

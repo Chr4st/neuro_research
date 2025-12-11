@@ -29,7 +29,6 @@ from .utils import validate_array
 
 logger = logging.getLogger(__name__)
 
-# Set style
 sns.set_style("whitegrid")
 plt.rcParams['figure.dpi'] = 100
 
@@ -54,7 +53,6 @@ def plot_connectome(
         title: Plot title
     """
     if not NETWORKX_AVAILABLE:
-        # Fallback to matrix heatmap
         fig, ax = plt.subplots(figsize=(10, 8))
         im = ax.imshow(W, cmap='viridis', aspect='auto')
         ax.set_title(title)
@@ -71,29 +69,23 @@ def plot_connectome(
         plt.close()
         return
     
-    # Create networkx graph
     G = nx.from_numpy_array(W)
     
-    # Remove weak edges
     if threshold > 0:
         edges_to_remove = [(u, v) for u, v, w in G.edges(data='weight') if w < threshold]
         G.remove_edges_from(edges_to_remove)
     
-    # Get node positions
     if node_positions is None:
         pos = nx.spring_layout(G, k=1, iterations=50)
     else:
         pos = {i: node_positions[i] for i in range(W.shape[0])}
     
-    # Plot
     fig, ax = plt.subplots(figsize=(12, 10))
     
-    # Draw edges
     edges = G.edges()
     weights = [G[u][v]['weight'] for u, v in edges]
     nx.draw_networkx_edges(G, pos, alpha=0.3, width=[w*2 for w in weights], ax=ax)
     
-    # Draw nodes
     if node_colors is not None:
         nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=100, cmap='viridis', ax=ax)
     else:
@@ -128,7 +120,6 @@ def plot_persistence_diagram(
     """
     fig, ax = plt.subplots(figsize=(8, 8))
     
-    # Separate by dimension
     for dim in [0, 1]:
         dim_diagram = diagram[diagram[:, 0] == dim]
         if len(dim_diagram) > 0:
@@ -138,7 +129,6 @@ def plot_persistence_diagram(
             label = f'H{dim}'
             ax.scatter(births, deaths, label=label, alpha=0.6, s=50)
     
-    # Diagonal line
     max_val = np.max(diagram[:, 1:3]) if len(diagram) > 0 else 1.0
     ax.plot([0, max_val], [0, max_val], 'k--', alpha=0.3, label='Diagonal')
     
@@ -186,7 +176,6 @@ def plot_embedding(
     n_dims = embedding.shape[1]
     
     if n_dims not in [2, 3]:
-        # Use first 2 dimensions
         embedding = embedding[:, :2]
         n_dims = 2
         logger.warning("Embedding has >3 dimensions, using first 2")
@@ -320,18 +309,15 @@ def plot_cluster_comparison(
         save_path: Optional path to save figure
         title: Plot title
     """
-    # Compute mean per cluster
     unique_labels = np.unique(labels[labels != -1])
     
     if feature_names is None:
         feature_names = [f"Feature_{i}" for i in range(data.shape[1])]
     
-    # Find features with highest variance across clusters
     cluster_means = np.array([np.mean(data[labels == label], axis=0) for label in unique_labels])
     feature_variance = np.var(cluster_means, axis=0)
     top_indices = np.argsort(feature_variance)[-top_n:][::-1]
     
-    # Prepare data for plotting
     plot_data = []
     for label in unique_labels:
         for idx in top_indices:
@@ -345,7 +331,6 @@ def plot_cluster_comparison(
     
     plot_df = pd.DataFrame(plot_data)
     
-    # Create plot
     fig, ax = plt.subplots(figsize=(12, 8))
     sns.boxplot(data=plot_df, x='Feature', y='Value', hue='Cluster', ax=ax)
     ax.set_title(title)

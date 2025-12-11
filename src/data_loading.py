@@ -47,16 +47,13 @@ def load_cortical_thickness(
     if subject_col not in df.columns:
         raise ValueError(f"Subject column '{subject_col}' not found in data")
     
-    # Extract ROI columns
     roi_cols = [col for col in df.columns if col.startswith(roi_prefix)]
     
     if len(roi_cols) == 0:
         raise ValueError(f"No ROI columns found with prefix '{roi_prefix}'")
     
-    # Extract thickness matrix
     thickness_matrix = df[roi_cols].values.astype(float)
     
-    # Extract metadata (non-ROI columns)
     metadata_cols = [col for col in df.columns if col not in roi_cols]
     metadata_df = df[metadata_cols].copy()
     
@@ -166,11 +163,9 @@ def create_mock_data(
     """
     np.random.seed(seed)
     
-    # Generate mock thickness (typical range: 1-5 mm)
     thickness_matrix = np.random.normal(2.5, 0.5, size=(n_subjects, n_rois))
     thickness_matrix = np.clip(thickness_matrix, 1.0, 5.0)
     
-    # Create metadata
     metadata_df = pd.DataFrame({
         'SubjectID': [f'SUBJ_{i:03d}' for i in range(n_subjects)],
         'Age': np.random.normal(75, 8, n_subjects),

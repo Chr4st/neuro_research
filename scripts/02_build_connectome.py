@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 import numpy as np
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -24,7 +23,6 @@ def create_mock_connectome(n_rois: int = 68, seed: int = 42) -> np.ndarray:
     """Create a mock structural connectome for testing."""
     np.random.seed(seed)
     
-    # Create symmetric, sparse connectome
     W = np.random.rand(n_rois, n_rois)
     W = (W + W.T) / 2  # Symmetrize
     W = W * (W > 0.3)  # Threshold for sparsity
@@ -52,7 +50,6 @@ def main(config_path: str = None, use_mock: bool = False):
     if use_mock or (connectome_path is None or not Path(connectome_path).exists()):
         logger.info("Generating mock connectome...")
         
-        # Get number of ROIs from previous step
         roi_count_path = processed_dir / "n_rois.txt"
         if roi_count_path.exists():
             with open(roi_count_path, 'r') as f:
@@ -63,7 +60,6 @@ def main(config_path: str = None, use_mock: bool = False):
         
         W = create_mock_connectome(n_rois=n_rois, seed=config.get('random_seed', 42))
         
-        # Save mock connectome
         connectome_path = processed_dir / "connectome.npy"
         np.save(connectome_path, W)
         logger.info(f"Saved mock connectome to {connectome_path}")
@@ -74,12 +70,10 @@ def main(config_path: str = None, use_mock: bool = False):
     validate_connectome(W)
     logger.info(f"Connectome: {W.shape[0]} ROIs, {np.count_nonzero(W)} edges")
     
-    # Compute Laplacian
     normalized = config.get('ndm.normalize_laplacian', True)
     logger.info(f"Computing {'normalized' if normalized else 'unnormalized'} Laplacian...")
     L = compute_laplacian(W, normalized=normalized)
     
-    # Save Laplacian
     laplacian_path = processed_dir / "laplacian.npy"
     np.save(laplacian_path, L)
     logger.info(f"Saved Laplacian to {laplacian_path}")

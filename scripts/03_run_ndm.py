@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 import numpy as np
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -33,7 +32,6 @@ def main(config_path: str = None):
     logger.info("Script 03: Run Network Diffusion Model")
     logger.info("=" * 60)
     
-    # Load data
     thickness_path = processed_dir / "cortical_thickness_processed.npy"
     if not thickness_path.exists():
         logger.error(f"Processed thickness not found: {thickness_path}")
@@ -43,7 +41,6 @@ def main(config_path: str = None):
     thickness = np.load(thickness_path)
     logger.info(f"Loaded thickness: {thickness.shape}")
     
-    # Load connectome
     connectome_path = processed_dir / "connectome.npy"
     if not connectome_path.exists():
         logger.error(f"Connectome not found: {connectome_path}")
@@ -60,7 +57,6 @@ def main(config_path: str = None):
     
     logger.info(f"NDM parameters: beta={beta}, time_steps={time_steps}, normalized={normalized}")
     
-    # Run NDM for each time step
     if len(time_steps) == 1:
         t = time_steps[0]
         logger.info(f"Running NDM at t={t}...")
@@ -86,7 +82,6 @@ def main(config_path: str = None):
             normalized_laplacian=normalized
         )
         
-        # Save each time point
         for i, t in enumerate(time_steps):
             diff_path = results_dir / f"thickness_diffused_t{t}.npy"
             np.save(diff_path, thickness_diff[:, i, :])

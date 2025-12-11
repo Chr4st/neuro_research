@@ -89,15 +89,12 @@ def validate_connectome(W: np.ndarray) -> None:
     if W.shape[0] != W.shape[1]:
         raise ValueError(f"Connectome must be square, got shape {W.shape}")
     
-    # Check symmetry (allow small numerical errors)
     if not np.allclose(W, W.T, atol=1e-10):
         raise ValueError("Connectome must be symmetric")
     
-    # Check non-negativity
-    if np.any(W < -1e-10):  # Allow small numerical errors
+    if np.any(W < -1e-10):
         raise ValueError("Connectome must have non-negative edge weights")
     
-    # Warn if diagonal is not zero
     if np.any(np.abs(np.diag(W)) > 1e-10):
         logger.warning("Connectome has non-zero diagonal (self-loops)")
 

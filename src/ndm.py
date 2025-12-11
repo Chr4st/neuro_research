@@ -53,17 +53,11 @@ def run_ndm_from_initial_seed(
     n_rois = W.shape[0]
     n_times = len(t_array)
     
-    # Compute matrix exponential for each time point
-    # For efficiency, we can compute exp(-β L t) for all t at once if needed
-    # But for large matrices, it's better to compute separately
-    
     if n_times == 1:
-        # Single time point
         exp_Lt = expm(-beta * L * t_array[0])
         x_pred = exp_Lt @ x0
         return x_pred
     else:
-        # Multiple time points
         x_pred = np.zeros((n_times, n_rois))
         for i, t_val in enumerate(t_array):
             exp_Lt = expm(-beta * L * t_val)

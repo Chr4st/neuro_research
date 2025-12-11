@@ -30,10 +30,7 @@ class Config:
                 user_config = yaml.safe_load(f) or {}
                 self._update_config(self.config, user_config)
         
-        # Override with environment variables
         self._load_from_env()
-        
-        # Convert string paths to Path objects
         self._normalize_paths()
     
     def _load_defaults(self) -> Dict[str, Any]:

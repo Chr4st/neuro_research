@@ -101,10 +101,8 @@ def test_cluster_differences(
     if feature_idx is not None:
         values = data[:, feature_idx]
     else:
-        # Use first feature or mean across features
         values = np.mean(data, axis=1)
     
-    # Group by cluster
     groups = [values[labels == label] for label in unique_labels]
     
     if test == "anova":

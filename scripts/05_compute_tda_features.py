@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 import numpy as np
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -39,7 +38,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info("Script 05: Compute TDA Features")
     logger.info("=" * 60)
     
-    # Load residuals
     residual_path = results_dir / f"residuals_t{time_point}.npy"
     if not residual_path.exists():
         logger.error(f"Residuals not found: {residual_path}")
@@ -49,7 +47,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     residuals = np.load(residual_path)
     logger.info(f"Loaded residuals: {residuals.shape}")
     
-    # Load connectome (optional, for edge-based filtration)
     connectome_path = processed_dir / "connectome.npy"
     W = None
     if connectome_path.exists():
@@ -62,7 +59,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     
     logger.info(f"TDA parameters: mode={mode}, max_dimension={max_dim}")
     
-    # Compute persistence diagrams
     logger.info("Computing persistence diagrams...")
     diagrams = compute_persistence_diagrams(
         residuals,
@@ -71,12 +67,10 @@ def main(config_path: str = None, time_point: float = 1.0):
         max_dimension=max_dim
     )
     
-    # Save diagrams
     diagrams_path = results_dir / f"persistence_diagrams_t{time_point}.npy"
     np.save(diagrams_path, diagrams, allow_pickle=True)
     logger.info(f"Saved {len(diagrams)} persistence diagrams to {diagrams_path}")
     
-    # Compute persistence images
     logger.info("Computing persistence images...")
     resolution = tuple(config.get('tda.persistence_image_resolution', [20, 20]))
     bandwidth = config.get('tda.persistence_image_bandwidth', 0.1)
@@ -87,12 +81,10 @@ def main(config_path: str = None, time_point: float = 1.0):
         bandwidth=bandwidth
     )
     
-    # Save persistence images
     pi_path = results_dir / f"persistence_images_t{time_point}.npy"
     np.save(pi_path, persistence_images)
     logger.info(f"Saved persistence images: {persistence_images.shape}")
     
-    # Compute reference diagram (e.g., from control group or all subjects)
     logger.info("Computing reference diagram...")
     reference_diagram = get_reference_diagram(diagrams, method='mean')
     
@@ -100,7 +92,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     np.save(ref_path, reference_diagram)
     logger.info(f"Saved reference diagram to {ref_path}")
     
-    # Compute TMI
     logger.info("Computing Topological Misalignment Index (TMI)...")
     metric = config.get('tda.tmi_metric', 'wasserstein')
     p = config.get('tda.tmi_p', 2)
@@ -112,7 +103,6 @@ def main(config_path: str = None, time_point: float = 1.0):
         p=p
     )
     
-    # Save TMI
     tmi_path = results_dir / f"tmi_values_t{time_point}.npy"
     np.save(tmi_path, tmi_values)
     logger.info(f"Saved TMI values: mean={np.mean(tmi_values):.4f}, std={np.std(tmi_values):.4f}")
@@ -130,7 +120,6 @@ def main(config_path: str = None, time_point: float = 1.0):
         logger.info(f"  Baire property holds: {baire_results['baire_property']}")
         logger.info(f"  Number of diagrams analyzed: {baire_results['n_diagrams']}")
         
-        # Save Baire analysis results
         import json
         baire_path = results_dir / f"baire_analysis_t{time_point}.json"
         with open(baire_path, 'w') as f:

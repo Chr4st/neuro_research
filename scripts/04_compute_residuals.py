@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 import numpy as np
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -34,7 +33,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info("Script 04: Compute Residuals")
     logger.info("=" * 60)
     
-    # Load observed thickness
     thickness_path = processed_dir / "cortical_thickness_processed.npy"
     if not thickness_path.exists():
         logger.error(f"Processed thickness not found: {thickness_path}")
@@ -44,7 +42,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     thickness_obs = np.load(thickness_path)
     logger.info(f"Loaded observed thickness: {thickness_obs.shape}")
     
-    # Load diffused thickness
     diff_path = results_dir / f"thickness_diffused_t{time_point}.npy"
     if not diff_path.exists():
         logger.error(f"Diffused thickness not found: {diff_path}")
@@ -54,16 +51,13 @@ def main(config_path: str = None, time_point: float = 1.0):
     thickness_diff = np.load(diff_path)
     logger.info(f"Loaded diffused thickness: {thickness_diff.shape}")
     
-    # Compute residuals
     logger.info("Computing residuals...")
     residuals = compute_residual(thickness_obs, thickness_diff)
     
-    # Save residuals
     residual_path = results_dir / f"residuals_t{time_point}.npy"
     np.save(residual_path, residuals)
     logger.info(f"Saved residuals to {residual_path}")
     
-    # Compute statistics
     stats = compute_residual_stats(residuals)
     logger.info(f"Residual statistics:")
     logger.info(f"  Mean: {np.mean(residuals):.4f}")
@@ -71,7 +65,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info(f"  Min: {np.min(residuals):.4f}")
     logger.info(f"  Max: {np.max(residuals):.4f}")
     
-    # Create diagnostic plots
     logger.info("Creating diagnostic plots...")
     
     plot_path = figures_dir / f"residual_distribution_t{time_point}.png"

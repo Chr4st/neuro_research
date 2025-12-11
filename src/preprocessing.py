@@ -33,7 +33,6 @@ def zscore_cortical_thickness(
     validate_array(thickness, expected_shape=None, name="thickness")
     
     if reference_group is not None:
-        # Use reference group statistics
         mean_ref = np.mean(reference_group, axis=axis, keepdims=True)
         std_ref = np.std(reference_group, axis=axis, keepdims=True, ddof=1)
         
@@ -42,7 +41,6 @@ def zscore_cortical_thickness(
         
         thickness_z = (thickness - mean_ref) / std_ref
     else:
-        # Z-score within the provided data
         thickness_z = zscore(thickness, axis=axis)
     
     logger.info(f"Z-scored cortical thickness: mean={np.mean(thickness_z):.4f}, std={np.std(thickness_z):.4f}")
@@ -130,13 +128,11 @@ def align_rois(
             )
         return data1, data2
     
-    # Find common ROIs
     common_labels = np.intersect1d(labels1, labels2)
     
     if len(common_labels) == 0:
         raise ValueError("No common ROIs found between datasets")
     
-    # Get indices for common ROIs
     indices1 = np.array([np.where(labels1 == label)[0][0] for label in common_labels])
     indices2 = np.array([np.where(labels2 == label)[0][0] for label in common_labels])
     

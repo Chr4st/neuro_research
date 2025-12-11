@@ -171,7 +171,6 @@ def is_dense_in_metric_space(
         return False
     
     if metric is None:
-        # Use Euclidean distance
         distances = cdist(space_points, subset_points, metric='euclidean')
     else:
         distances = np.array([
@@ -179,7 +178,6 @@ def is_dense_in_metric_space(
             for x in space_points
         ])
     
-    # Check if every point in space is within epsilon of some point in subset
     min_distances = np.min(distances, axis=1)
     return np.all(min_distances < epsilon)
 
@@ -210,12 +208,10 @@ def is_open_set(
         if not membership_function(point):
             return False
         
-        # Check epsilon-ball: generate random points near this point
         n_samples = 100
         noise = np.random.normal(0, epsilon, size=(n_samples, point.shape[0]))
         nearby_points = point + noise
         
-        # Check if all nearby points are in the set
         for nearby in nearby_points:
             if not membership_function(nearby):
                 return False
@@ -252,18 +248,15 @@ def baire_category_theorem_intersection(
     if len(dense_open_sets) == 0:
         return True
     
-    # Sample test points from the space
     if len(space_points) > n_test_points:
         indices = np.random.choice(len(space_points), n_test_points, replace=False)
         test_points = space_points[indices]
     else:
         test_points = space_points
     
-    # For each test point, check if it's in the intersection
     intersection_points = []
     
     for point in test_points:
-        # Check if point is in all dense open sets
         in_all_sets = all(membership_func(point) for membership_func in dense_open_sets)
         if in_all_sets:
             intersection_points.append(point)
@@ -273,7 +266,6 @@ def baire_category_theorem_intersection(
     
     intersection_points = np.array(intersection_points)
     
-    # Check if intersection is dense
     return is_dense_in_metric_space(
         intersection_points,
         test_points,
@@ -307,41 +299,34 @@ def check_baire_space_completeness(
     if metric is None:
         metric = lambda x, y: np.linalg.norm(x - y)
     
-    # Generate random Cauchy sequences and check convergence
     n_sequences = 50
     n_steps = 20
     
     for _ in range(n_sequences):
-        # Start with a random point
         idx = np.random.randint(0, len(points))
         sequence = [points[idx]]
         
-        # Generate a sequence that should converge
         for step in range(1, n_steps):
-            # Move towards a target point
             target_idx = np.random.randint(0, len(points))
             target = points[target_idx]
             
-            # Create next point in sequence (moving towards target)
             current = sequence[-1]
             direction = target - current
-            step_size = 1.0 / (step + 1)  # Decreasing step size
+            step_size = 1.0 / (step + 1)
             next_point = current + step_size * direction
             sequence.append(next_point)
         
-        # Check if sequence is Cauchy
         is_cauchy = True
         for i in range(len(sequence) - 1):
             for j in range(i + 1, len(sequence)):
                 dist = metric(sequence[i], sequence[j])
-                if dist > cauchy_epsilon * (j - i):  # Rough Cauchy check
+                if dist > cauchy_epsilon * (j - i):
                     is_cauchy = False
                     break
             if not is_cauchy:
                 break
         
         if is_cauchy:
-            # Check if limit point is close to any point in space
             limit_point = sequence[-1]
             distances = [metric(limit_point, p) for p in points]
             min_dist = np.min(distances)
@@ -382,8 +367,6 @@ def apply_baire_category_to_persistence_diagrams(
             'baire_property': False
         }
     
-    # Convert diagrams to a common representation (e.g., persistence images)
-    # For simplicity, use diagram coordinates directly
     try:
         from src.tda_features import compute_persistence_images
         diagram_features = compute_persistence_images(
@@ -391,19 +374,15 @@ def apply_baire_category_to_persistence_diagrams(
             resolution=(10, 10),
             bandwidth=0.1
         )
-        space_points = diagram_features[:-1]  # All but reference
+        space_points = diagram_features[:-1]
         reference_point = diagram_features[-1]
     except Exception:
-        # Fallback: use raw diagram coordinates
         logging.warning("Could not compute persistence images, using raw coordinates")
-        # Flatten diagrams for analysis
         space_points = np.array([d.flatten() for d in diagrams])
         reference_point = reference_diagram.flatten()
     
-    # Check completeness
     is_complete = check_baire_space_completeness(space_points)
     
-    # Define dense open sets (e.g., sets of diagrams close to reference)
     def create_dense_open_set(center: np.ndarray, radius: float):
         """Create a membership function for a dense open set."""
         def membership(point: np.ndarray) -> bool:
@@ -411,13 +390,11 @@ def apply_baire_category_to_persistence_diagrams(
             return dist < radius
         return membership
     
-    # Create example dense open sets
     dense_open_sets = [
         create_dense_open_set(reference_point, 1.0),
         create_dense_open_set(reference_point, 2.0),
     ]
     
-    # Verify Baire property
     baire_property = baire_category_theorem_intersection(
         dense_open_sets,
         space_points,

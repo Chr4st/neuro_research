@@ -11,7 +11,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import load_config
@@ -35,7 +34,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info("Script 06: Run Clustering")
     logger.info("=" * 60)
     
-    # Load TDA features
     pi_path = results_dir / f"persistence_images_t{time_point}.npy"
     tmi_path = results_dir / f"tmi_values_t{time_point}.npy"
     
@@ -74,7 +72,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     logger.info(f"  Reduction: {reduction_method}, n_components={n_components}")
     logger.info(f"  Clustering: {clustering_method}")
     
-    # Run clustering
     logger.info("Running clustering...")
     results = discover_subtypes(
         features,
@@ -89,7 +86,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     labels = results['labels']
     embedding = results['embedding']
     
-    # Save results
     labels_path = results_dir / f"cluster_labels_t{time_point}.npy"
     np.save(labels_path, labels)
     logger.info(f"Saved cluster labels to {labels_path}")
@@ -98,7 +94,6 @@ def main(config_path: str = None, time_point: float = 1.0):
     np.save(embedding_path, embedding)
     logger.info(f"Saved embedding to {embedding_path}")
     
-    # Create summary
     unique_labels = np.unique(labels)
     n_clusters = len(unique_labels[unique_labels != -1])
     n_noise = np.sum(labels == -1)
@@ -111,7 +106,6 @@ def main(config_path: str = None, time_point: float = 1.0):
             n_in_cluster = np.sum(labels == label)
             logger.info(f"  Cluster {label}: {n_in_cluster} subjects")
     
-    # Save cluster assignments as CSV
     metadata_path = processed_dir / "metadata.csv"
     if metadata_path.exists():
         metadata = pd.read_csv(metadata_path)
@@ -120,7 +114,6 @@ def main(config_path: str = None, time_point: float = 1.0):
         metadata.to_csv(cluster_csv_path, index=False)
         logger.info(f"Saved cluster assignments to {cluster_csv_path}")
     
-    # Plot embedding
     logger.info("Creating embedding plot...")
     plot_path = figures_dir / f"embedding_clusters_t{time_point}.png"
     plot_embedding(embedding, labels=labels, save_path=plot_path, title="Subtype Clusters")
