@@ -11,7 +11,7 @@
 
 \title{Topological Misalignment of Network-Diffusion Residuals Reveals Alzheimer's Disease Subtypes and Progression Pathways}
 
-\author{Your Name$^{1,2}$, Co-Author$^{2}$, \ldots}
+\author{Christ Xu}
 
 \date{\today}
 
@@ -25,11 +25,29 @@ Alzheimer's disease (AD) exhibits substantial heterogeneity in clinical presenta
 
 \section{Introduction}
 
-Alzheimer's disease (AD) is a neurodegenerative disorder characterized by progressive cognitive decline and brain atrophy. However, AD exhibits substantial heterogeneity in clinical presentation, progression rates, and spatial patterns of pathology \cite{reference1}. This heterogeneity suggests the existence of distinct AD subtypes, each with potentially different underlying mechanisms and progression pathways.
+Alzheimer's disease (AD) is a neurodegenerative disorder characterized by progressive cognitive decline and brain atrophy. However, AD exhibits substantial heterogeneity in clinical presentation, progression rates, and spatial patterns of pathology \cite{reference1}. This heterogeneity suggests the existence of distinct AD subtypes, each with potentially different underlying mechanisms and progression pathways. Understanding these subtypes is crucial for developing personalized treatment strategies and improving patient outcomes.
 
-Network Diffusion Models (NDM) have been successfully applied to model disease progression in AD \cite{raj2012}. NDM predicts how pathology spreads through the brain's structural connectome, assuming disease propagates along white matter tracts. The difference between observed pathology and NDM-predicted pathology---the residual---may capture subject-specific deviations from the expected network-based progression.
+\subsection{Background: Network Diffusion Models}
 
-Topological Data Analysis (TDA) provides tools to characterize the shape and structure of data \cite{edelsbrunner2010,chazal2016}. Persistent homology, a key TDA method \cite{edelsbrunner2002,cohen2005}, identifies topological features (connected components, holes, etc.) that persist across different scales. The stability of persistence diagrams under small perturbations \cite{cohen2007,cohen2009} makes them robust for analyzing noisy biological data. Applied to residual fields, persistent homology can capture the topological structure of how pathology deviates from the expected network diffusion pattern, with theoretical guarantees provided by the Baire Category Theorem \cite{baire1899,rudin1976}.
+Network Diffusion Models (NDM) have been successfully applied to model disease progression in AD \cite{raj2012}. The fundamental principle underlying NDM is that pathology spreads through the brain along structural connections, similar to how heat diffuses through a network. The brain's structural connectome, derived from diffusion-weighted MRI, provides a graph representation where nodes represent brain regions and edges represent white matter connections. 
+
+The NDM framework models pathology propagation as a diffusion process on this graph. Mathematically, this is described by the heat equation on graphs, where the rate of change of pathology at each node depends on the graph Laplacian, which encodes the network topology. The Laplacian matrix captures both local connectivity and global network structure, making it a natural operator for modeling diffusion processes. The normalized Laplacian, in particular, ensures that diffusion rates are comparable across nodes with different degrees, providing a more robust model for heterogeneous brain networks.
+
+NDM predicts how pathology spreads through the brain's structural connectome, assuming disease propagates along white matter tracts. The model can be initialized with a seed pattern (e.g., early pathology in specific regions) and evolved forward in time to predict future pathology distribution. The difference between observed pathology and NDM-predicted pathology---the residual---captures subject-specific deviations from the expected network-based progression. These residuals may reveal individual differences in disease mechanisms, resistance to network-based spread, or alternative progression pathways.
+
+\subsection{Background: Topological Data Analysis}
+
+Topological Data Analysis (TDA) provides powerful tools to characterize the shape and structure of data \cite{edelsbrunner2010,chazal2016}. Unlike traditional geometric or statistical methods, TDA focuses on topological invariants---properties that remain unchanged under continuous deformations. This makes TDA particularly well-suited for analyzing high-dimensional, noisy biological data where exact geometric relationships may be less informative than global structural patterns.
+
+Persistent homology, a key TDA method \cite{edelsbrunner2002,cohen2005}, identifies topological features (connected components, holes, voids, etc.) that persist across different scales. The method works by constructing a filtration---a nested sequence of topological spaces---parameterized by a scale parameter. As the scale increases, topological features appear (are "born") and disappear (are "killed"). The persistence diagram records these birth-death pairs, providing a multi-scale summary of the data's topological structure.
+
+The stability of persistence diagrams under small perturbations \cite{cohen2007,cohen2009} makes them robust for analyzing noisy biological data. This stability property, formalized through the bottleneck and Wasserstein distances, ensures that small changes in the input data result in bounded changes in the persistence diagram. This theoretical guarantee is crucial for applications in neuroscience, where measurement noise and biological variability are inherent.
+
+Applied to residual fields, persistent homology can capture the topological structure of how pathology deviates from the expected network diffusion pattern. The residual field represents the spatial pattern of deviations, and its topological structure---characterized by connected components, holes, and higher-dimensional features---provides a rich description of how pathology fails to follow the expected network-based progression. This topological characterization is complementary to traditional statistical measures, capturing global structural patterns that may be missed by local analyses.
+
+\subsection{Theoretical Foundations: Baire Category Theorem}
+
+The theoretical foundation for our approach relies on the Baire Category Theorem \cite{baire1899,rudin1976}, a fundamental result in topology and functional analysis. The space of persistence diagrams, equipped with the Wasserstein or bottleneck metric, forms a complete metric space \cite{cohen2007,chazal2016}. The Baire Category Theorem guarantees that in such spaces, the intersection of countably many dense open sets is dense. This property ensures that generic properties---those that hold on a dense $G_\delta$ set---are prevalent in the space of persistence diagrams, providing theoretical justification for our computational approach.
 
 \section{Methods}
 
@@ -44,18 +62,21 @@ We use data from the Alzheimer's Disease Neuroimaging Initiative (ADNI). The dat
 
 \subsection{Network Diffusion Model}
 
-The Network Diffusion Model describes pathology spread as:
+The Network Diffusion Model describes pathology spread as a diffusion process on the structural connectome. The mathematical formulation is given by the heat equation on graphs:
 \begin{equation}
 \frac{dx}{dt} = -\beta L x
 \end{equation}
-where $x(t)$ is the pathology pattern at time $t$, $\beta$ is the diffusion rate, and $L$ is the graph Laplacian of the structural connectome.
+where $x(t) \in \mathbb{R}^n$ is the pathology pattern at time $t$ (a vector with one entry per brain region), $\beta > 0$ is the diffusion rate parameter controlling the speed of propagation, and $L$ is the graph Laplacian of the structural connectome.
 
-The solution is:
+The graph Laplacian $L$ is defined as $L = D - W$ for the unnormalized case, or $L = I - D^{-1/2} W D^{-1/2}$ for the normalized case, where $W$ is the adjacency matrix (connectome), $D$ is the degree matrix, and $I$ is the identity matrix. The normalized Laplacian is often preferred as it accounts for node degree heterogeneity and provides more stable diffusion dynamics.
+
+The solution to the diffusion equation is obtained via matrix exponentiation:
 \begin{equation}
 x(t) = \exp(-\beta L t) x(0)
 \end{equation}
+where $x(0)$ is the initial pathology pattern (seed). The matrix exponential $\exp(-\beta L t)$ encodes the network structure and determines how pathology spreads from the initial seed through the connectome over time $t$.
 
-We apply NDM to predict expected pathology from an initial seed pattern.
+We apply NDM to predict expected pathology from an initial seed pattern. The seed can be chosen based on known early pathology sites (e.g., entorhinal cortex for AD) or can be set to the observed pattern itself to model smoothing effects. The parameter $\beta$ controls the diffusion rate and can be optimized to best match observed pathology patterns or set based on biological knowledge of disease progression rates.
 
 \subsection{Residual Computation}
 
@@ -67,15 +88,37 @@ where $x_{\text{obs}}$ is observed cortical thickness (or atrophy) and $x_{\text
 
 \subsection{Topological Data Analysis}
 
-We compute persistent homology on the residual field using a node-based filtration, where each ROI is a point and the residual value determines the filtration height. This yields persistence diagrams for H0 (connected components) and H1 (loops).
+We compute persistent homology on the residual field to extract topological features that characterize the structure of deviations from expected network-based progression. Our approach uses a node-based filtration, where each brain region (ROI) is treated as a point in a metric space, and the residual value at that region determines its filtration height.
+
+The filtration process works as follows: starting with an empty complex, we gradually add simplices (points, edges, triangles, etc.) as the filtration parameter increases. For each value of the filtration parameter, we compute the homology groups $H_k$ which capture $k$-dimensional topological features: $H_0$ captures connected components, $H_1$ captures loops (1-dimensional holes), and higher-dimensional homology groups capture voids and higher-dimensional structures.
+
+As the filtration parameter increases, topological features appear (are "born") and disappear (are "killed"). The persistence diagram records these birth-death pairs $(b, d)$ for each topological feature, where $b$ is the birth time and $d$ is the death time. Features that persist for a long time (large $d - b$) are considered more significant, as they represent stable topological structures in the data.
+
+This yields persistence diagrams for $H_0$ (connected components) and $H_1$ (loops), which we use to characterize the topological structure of residual fields. The persistence diagram provides a multi-scale summary that is robust to noise and captures global structural patterns that may not be apparent in local statistical analyses.
 
 \subsection{Topological Misalignment Index (TMI)}
 
-TMI quantifies the topological distance between a subject's persistence diagram and a reference diagram (e.g., healthy controls):
+The Topological Misalignment Index (TMI) quantifies the topological distance between a subject's persistence diagram and a reference diagram (e.g., healthy controls or a group average). This distance measure captures how "topologically different" a subject's residual field is compared to the reference, providing a single scalar summary of topological deviation.
+
+Formally, TMI is defined as:
 \begin{equation}
 \text{TMI} = d(D_{\text{subject}}, D_{\text{reference}})
 \end{equation}
-where $d$ is the Wasserstein or bottleneck distance.
+where $d$ is a distance metric on the space of persistence diagrams. We consider two standard metrics:
+
+The \emph{bottleneck distance} measures the maximum distance between matched points in the two diagrams under an optimal matching. It is defined as:
+\begin{equation}
+d_B(D_1, D_2) = \inf_{\gamma} \sup_{p \in D_1} \|p - \gamma(p)\|_\infty
+\end{equation}
+where $\gamma$ ranges over all bijections between $D_1$ and $D_2$ (with points on the diagonal allowed for unmatched features), and $\|\cdot\|_\infty$ is the $L_\infty$ norm.
+
+The \emph{Wasserstein distance} (also called the Earth Mover's Distance) is a more refined metric that considers all matched points:
+\begin{equation}
+d_W^p(D_1, D_2) = \left(\inf_{\gamma} \sum_{p \in D_1} \|p - \gamma(p)\|^p\right)^{1/p}
+\end{equation}
+where $p \geq 1$ is a parameter (typically $p=2$). The Wasserstein distance provides a more sensitive measure of topological differences, as it accounts for the distribution of all features rather than just the worst-case mismatch.
+
+TMI values near zero indicate that the subject's residual topology closely matches the reference, suggesting that their pathology follows the expected network-based progression. Large TMI values indicate substantial topological deviation, which may reflect alternative progression pathways, resistance to network-based spread, or distinct disease mechanisms.
 
 \subsection{Baire Category Theorem and Theoretical Foundations}
 

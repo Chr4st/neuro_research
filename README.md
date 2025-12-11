@@ -226,15 +226,6 @@ If you use this code in your research, please cite:
 └── README.md              # This file
 ```
 
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with appropriate tests
-4. Submit a pull request
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -244,10 +235,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ADNI data contributors
 - Developers of giotto-tda, scikit-learn, and other open-source tools
 - The topological data analysis and network neuroscience communities
-
-## Contact
-
-For questions or issues, please open a GitHub issue or contact [your-email@example.com].
 
 ## References
 
